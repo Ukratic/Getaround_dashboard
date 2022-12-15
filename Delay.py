@@ -18,13 +18,16 @@ st.markdown("""This is a dashboard for the Getaround project.
 The purpose of this dashboard is to provide a quick overview of the data and to allow the business team to explore the data in more detail.
 Data is split into 2 datasets : one contains the data from the cars and the other one contains the data from the rentals.
 
-You will find graphs representing completed or canceled rentals per checkin type, the distribution of checkout delays and several recommendations to improve the business.
-""")
+You will find graphs representing completed or canceled rentals per checkin type, the distribution of checkout delays and several recommendations to improve the business.\n
+The current page covers the delay dataset. You can navigate to the other page using the sidebar on the left.
+
+You can also check out the Getaround pricing API [here](https://getaround-api-p5.herokuapp.com/docs) to extract data and use the predict endpoint.""")
 
 st.sidebar.write("Dashboard made by [@Ukratic](https://github.com/Ukratic)")
+
 st.sidebar.success("Navigate to a page above")
 
-st.subheader("Getaround data : Delay")
+st.header("Getaround data : Delay")
 st.markdown("""A few new columns have been added to make it easier to explore the data.
 - `checkout` : string value representing the delay (see values in graph below).
 - `next_rental` : Whether there is a rental after the current one or not.
@@ -235,8 +238,8 @@ st.markdown(f"""Supposing a rate by the minute for a late checkout, the {number_
 If late checkouts have to pay for the additional time at a rate by the minute, some of the "max loss" is mitigated.""")
 
 late_loss = canceled_loss - late_revenue
-st.markdown(f"""If canceled rentals were for less than {round(late_revenue/canceled_loss*24,2)} hours, additional revenue from late checkouts and loss from canceled rentals break even.
-For a full day, it generates a {round(late_loss,2)} $ loss for a full day, assuming all cancelled rentals were because of a late checkout.""")
+st.markdown(f"""If canceled rentals were for less than {round(late_revenue/canceled_loss*24,2)} hours, additional revenue from late checkouts and loss from canceled rentals break even after 24 hours.
+If cancelled rentals were supposed to last a full day, it potentially generates a {round(late_loss,2)} $ loss, again assuming all cancelled rentals were because of a late checkout.""")
 
 threshold_range = np.arange(0, 60*24, step=15) # 15min intervals in a day
 total_late_revenue = []
@@ -249,11 +252,12 @@ fig, ax = plt.subplots(1, 2, sharex=True, figsize=(15,6))
 ax[0].plot(threshold_range/60, total_late_revenue)
 ax[0].hlines(y=canceled_loss/24*5.86, xmin=0, xmax=24, linewidth=2, color='r')
 ax[0].set_title('Assuming average canceled rentals were for 5.86 hours')
-ax[0].set_xlabel('Threshold (hours)')
-ax[1].set_xlabel('Threshold (hours)')
+ax[0].set_xlabel('Time (hours)')
+ax[1].set_xlabel('Time (hours)')
 ax[0].set_ylabel('Revenue $')
 ax[1].plot(threshold_range/60, total_late_revenue)
 ax[1].hlines(y=canceled_loss, xmin=0, xmax=24, linewidth=2, color='r')
+ax[0].legend(['Additional revenue','Max loss'], loc='center left')
 ax[1].set_title('Assuming average canceled rentals were for 24 hours')
 st.pyplot(fig)
 
@@ -270,7 +274,8 @@ risk_over_revenue = round(at_risk/(revenue),2)
 st.markdown(f"""We can calculate the `maximum risk` of late arrivals.
 This is even more theoretical since it assumes:
 - Every minute late results in a cancellation
-- Every car is planned for a rental
+- All rentals have a next one planned 
+- All cancelled rentals would have been a 24 hour rental
 
 Late arrivals trigger a `max risk` of {at_risk} \$, so about {risk_over_revenue} times the total estimated revenue from rentals of {round(revenue,2)} $.""")
 
@@ -299,11 +304,12 @@ plt.title('Threshold time (in minutes) and risk over late revenue')
 st.pyplot(fig)
 
 st.markdown("""For standard rentals of **1 day** and a **penalty of 3 times the normal minute rate** after the rental is due, with our current data we would need to set a **threshold of 180 minutes** to mitigate losses from late checkouts.
-""")
+
+It is of course possible to ~~squeeze some more~~ increase the profit margin by increasing the penalty, but this would also increase the risk of losing customers.""")
 
 
 st.markdown("""**Additional remarks**:
-A significant caveat is that all this, on top of some assumptions (duration of rental, maximum loss...), does not take into account actual demand in rentals. This has limited production applications and this should not be relied upon as neither a comprehensive projection of revenue nor a reliable way to alleviate user discomfort (see assumptions for `max loss` and `max risk` above).
+A significant caveat is that all this, on top of some assumptions (duration of rental, maximum loss...), does not take into account actual demand in rentals. This has limited production applications and this should be used as an exploratory guide into the data, but neither a comprehensive projection of revenue nor a reliable way to alleviate user discomfort (see assumptions for `max loss` and `max risk` above).
 
 A reduced profit margin is not a perfectly accurate way to account for user discomfort and a new metric should be made, perhaps using the results of a poll to estimate the impact of delays on the user experience.
 

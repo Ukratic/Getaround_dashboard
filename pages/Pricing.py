@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
 
 # Page config, titles & introduction
 st.set_page_config(page_title="delay dashboard", page_icon=":red_car:", layout="wide")
@@ -13,7 +14,7 @@ st.set_page_config(page_title="delay dashboard", page_icon=":red_car:", layout="
 st.sidebar.write("Dashboard made by [@Ukratic](https://github.com/Ukratic)")
 st.sidebar.success("Navigate to a page above")
 
-st.subheader("Getaround data : Pricing")
+st.header("Getaround data : Pricing")
 st.markdown("""Egregious outliers have been removed but otherwise the data is unchanged.
 """)
 
@@ -33,6 +34,14 @@ if st.checkbox('Show raw data'):
 
 # Data exploration
 st.subheader("Data exploration")
+
+st.markdown("""A quick overview of the data""")
+
+fig = px.sunburst(data, path=['model_key', 'car_type'], values='rental_price_per_day',width=1000,height=800, 
+labels={'rental_price_per_day':'Rental revenue per day'})
+fig.update_layout(title='Rental revenue per day per brand and car type')
+st.plotly_chart(fig,use_container_width=True)
+
 
 st.markdown("""Data on car brands and models""")
 col1, col2= st.columns(2)
