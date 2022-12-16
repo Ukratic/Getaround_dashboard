@@ -35,7 +35,7 @@ def read_file(bucket_name, file_path):
     return content
 
 bucket_name = "get_around_data"
-file_path = "delay_df.csv"
+file_path = "pricing_df.csv"
 
 data_load_state = st.text('Loading data, please wait...')
 content = read_file(bucket_name, file_path)
