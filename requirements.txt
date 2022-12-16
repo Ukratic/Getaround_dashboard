@@ -4,3 +4,4 @@ plotly
 numpy
 matplotlib
 seaborn
+google-cloud-storage

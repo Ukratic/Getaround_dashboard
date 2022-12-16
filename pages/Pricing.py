@@ -6,6 +6,9 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+import io
+from google.oauth2 import service_account
+from google.cloud import storage
 
 # Page config, titles & introduction
 st.set_page_config(page_title="delay dashboard", page_icon=":red_car:", layout="wide")
@@ -18,16 +21,29 @@ st.header("Getaround data : Pricing")
 st.markdown("""Egregious outliers have been removed but otherwise the data is unchanged.
 """)
 
-# Load data
-@st.cache(allow_output_mutation=True)
-def load_data(nrows):
-    data = pd.read_csv('https://storage.googleapis.com/get_around_data/pricing_df.csv')
-    return data
+# Google storage credentials
+credentials = service_account.Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"]
+)
+client = storage.Client(credentials=credentials)
+
+# Uses st.experimental_memo to only rerun when the query changes or after 10 min.
+@st.experimental_memo(ttl=600)
+def read_file(bucket_name, file_path):
+    bucket = client.bucket(bucket_name)
+    content = bucket.blob(file_path).download_as_string().decode('utf-8')
+    return content
+
+bucket_name = "get_around_data"
+file_path = "delay_df.csv"
 
 data_load_state = st.text('Loading data, please wait...')
-data = load_data(None)
+content = read_file(bucket_name, file_path)
+
+data = pd.read_csv(io.StringIO(content))
 data_load_state.text("")
 
+# Show raw data
 if st.checkbox('Show raw data'):
     st.subheader('Raw data')
     st.write(data)
