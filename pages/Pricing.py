@@ -11,7 +11,7 @@ from google.oauth2 import service_account
 from google.cloud import storage
 
 # Page config, titles & introduction
-st.set_page_config(page_title="delay dashboard", page_icon=":red_car:", layout="wide")
+st.set_page_config(page_title="getaround dashboard", page_icon=":red_car:", layout="wide")
 
 
 st.sidebar.write("Dashboard made by [@Ukratic](https://github.com/Ukratic)")
